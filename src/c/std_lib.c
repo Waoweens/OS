@@ -1,3 +1,66 @@
 #include "header/std_lib.h"
 
-// Opsional : Tambahkan implementasi kode C
+// Tambahkan implementasi kode C
+
+int div(int a, int b) {
+	int i = 0;
+	while (a - b >= 0) {
+		a -= b;
+		i++;
+	}
+	return i;
+}
+
+int mod(int a, int n) {
+	while (a - n >= 0) {
+		a -= n;
+	}
+	return a;
+}
+
+// Mengcopy n bytes yang ditunjuk src ke dest
+void memcpy(byte *dest, byte *src, unsigned int n) {
+	int i;
+	for (i = 0; i < n; i++) {
+		dest[i] = src[i];
+	}
+}
+
+// Mengembalikan panjang suatu null terminated string
+unsigned int strlen(char *string) {
+	int i = 0;
+	while (string[i] != '\0') {
+		i++;
+	}
+	return i;
+}
+
+// Mengembalikan true jika string sama
+bool strcmp(char *s1, char *s2) {
+	int i = 0;
+	while (s1[i] != '\0' && s2[i] != '\0') {
+		if (s1[i] != s2[i]) {
+			return false;
+		}
+		i++;
+	}
+	return true;
+}
+
+// Melakukan penyalinan null terminated string
+void strcpy(char *dst, char *src) {
+	int i = 0;
+	while (src[i] != '\0') {
+		dst[i] = src[i];
+		i++;
+	}
+	dst[i] = '\0';
+}
+
+// Mengosongkan byte array yang memiliki panjang n
+void clear(byte *ptr, unsigned int n) {
+	int i;
+	for (i = 0; i < n; i++) {
+		ptr[i] = 0;
+	}
+}
