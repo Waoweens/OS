@@ -6,6 +6,7 @@
 		"*.js.liquid": "liquid-javascript",
 		"*.css.liquid": "liquid-css",
 		"*.scss.liquid": "liquid-scss",
-		"std_type.h": "c"
+		"std_type.h": "c",
+		"std_lib.h": "c"
 	}
 }

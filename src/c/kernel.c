@@ -23,16 +23,24 @@ int main() {
 void shell() {
 	char input_buf[64];
 	char path_str[128];
-	byte current_dir = FS_NODE_P_IDX_ROOT;
+	byte current_dir = 0x0;
 
 	while(true) {
 		printString("user@host:");
-		// printCWD(path_str, current_dir); // TODO
-		printString("$");
+		printCWD(path_str, current_dir);
+		printString(" $ ");
 		readString(input_buf);
 
-		if (strcmp(input_buf, "ls")) {
+		if (startsWith(input_buf, "pwd")) {
+			printCWD(path_str, current_dir);
+			printString("\r\n");
+		} else if (startsWith(input_buf, "ls")) {
+			ls("", current_dir);
 
+		} else if (startsWith(input_buf, "cat")) {
+			cat(input_buf + 4, current_dir);
+		} else if (input_buf[0] == 0) {
+			// do nothing
 		} else {
 			printString("Command not found\r\n");
 		}
@@ -64,7 +72,85 @@ void handleInterrupt21(int AX, int BX, int CX, int DX) {
 	}
 }
 
-// void printCWD()
+// printCWD(path_str, current_dir)
+void printCWD(char* path_str, byte current_dir) {
+	struct node_filesystem node_fs_buffer;
+	byte array[64];
+	int i = 0;
+	int j = 0;
+
+	clrarr(path_str, 128);
+	
+	readSector(&(node_fs_buffer.nodes[0]), FS_NODE_SECTOR_NUMBER);
+	readSector(&(node_fs_buffer.nodes[32]), FS_NODE_SECTOR_NUMBER + 1);
+
+	if (current_dir == FS_NODE_P_IDX_ROOT) {
+		printString("/");
+		strcpy(path_str, "/");
+		return;
+	} 
+
+	while (current_dir != FS_NODE_P_IDX_ROOT) {
+		array[i] = current_dir;
+		current_dir = node_fs_buffer.nodes[current_dir].parent_node_index;
+		i++;
+	}
+
+	for (j = i-1; j >= 0; j--) {
+		printString("/");
+		strcat(path_str, "/");
+		printString(node_fs_buffer.nodes[array[j]].name);
+		strcat(path_str, node_fs_buffer.nodes[array[j]].name);
+	}
+
+}
+
+void ls(char* dir_name, byte current_dir) {
+	struct node_filesystem node_fs_buffer;
+	int i = 0;
+	
+	readSector(&(node_fs_buffer.nodes[0]), FS_NODE_SECTOR_NUMBER);
+	readSector(&(node_fs_buffer.nodes[32]), FS_NODE_SECTOR_NUMBER + 1);
+
+	for (i = 0; i < 64; i++) {
+		if (node_fs_buffer.nodes[i].parent_node_index == current_dir) {
+			if (node_fs_buffer.nodes[i].name[0] == 0) {
+				continue;
+			}
+
+			printString(node_fs_buffer.nodes[i].name);
+			printString("\r\n");
+		}
+	}
+}
+
+void cat(char* file_name, byte current_dir) {
+	struct file_metadata metadata;
+	byte buffer[8192];
+	enum fs_retcode retcode;
+
+	metadata.buffer = buffer;
+	metadata.node_name = file_name;
+	metadata.parent_index = current_dir;
+	metadata.filesize = 0;
+
+	read(&metadata, &retcode);
+	switch (retcode) {
+		case FS_SUCCESS:
+			printString(metadata.buffer);
+			printString("\r\n");
+			break;
+		case FS_R_NODE_NOT_FOUND:
+			printString("File not found\r\n");
+			break;
+		case FS_R_TYPE_IS_FOLDER:
+			printString("File is a directory\r\n");
+			break;
+		default:
+			printString("Unknown error\r\n");
+	}
+
+}
 
 void printString(char *string) {
 	int i = 0;
@@ -172,7 +258,6 @@ void fillMap() {
 	writeSector(&map_fs_buffer, FS_MAP_SECTOR_NUMBER);
 }
 
-// i don't know what i'm doing
 void read(struct file_metadata *metadata, enum fs_retcode *return_code) {
 	struct node_filesystem node_fs_buffer;
 	struct sector_filesystem sector_fs_buffer;
@@ -195,7 +280,7 @@ void read(struct file_metadata *metadata, enum fs_retcode *return_code) {
 	for (i = 0; i < 64; i++) {
 		if (node_fs_buffer.nodes[i].parent_node_index ==
 				metadata->parent_index &&
-			strcmp(node_fs_buffer.nodes[i].name, metadata->node_name) == 0) {
+			strcmp(node_fs_buffer.nodes[i].name, metadata->node_name)) {
 			break;
 		}
 	}
@@ -269,7 +354,7 @@ void write(struct file_metadata *metadata, enum fs_retcode *return_code) {
 	for (i = 0; i < 64; i++) {
 		if (node_fs_buffer.nodes[i].parent_node_index ==
 				metadata->parent_index &&
-			strcmp(node_fs_buffer.nodes[i].name, metadata->node_name) == 0) {
+			strcmp(node_fs_buffer.nodes[i].name, metadata->node_name)) {
 			*return_code = FS_W_FILE_ALREADY_EXIST;
 			return;
 		}

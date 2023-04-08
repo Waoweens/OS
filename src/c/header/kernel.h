@@ -13,6 +13,7 @@ void fillMap();
 
 
 // TODO : Implementasikan
+
 void printString(char *string);
 void printChar(char character);
 void readString(char *string);
@@ -25,3 +26,7 @@ void write(struct file_metadata *metadata, enum fs_retcode *return_code);
 void read(struct file_metadata *metadata, enum fs_retcode *return_code);
 
 void shell();
+
+void printCWD(char *path_str, byte current_dir);
+void ls(char* dir_name, byte current_dir);
+void cat(char* file_name, byte current_dir);

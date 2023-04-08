@@ -24,3 +24,12 @@ void strcpy(char *dst, char *src);
 
 // Mengosongkan byte array yang memiliki panjang n
 void clear(byte *ptr, unsigned int n);
+
+// concat string
+void strcat(char *dst, char *src);
+
+// clear array
+void clrarr(char *arr, int size);
+
+// starts with
+bool startsWith(char *str, char *prefix);

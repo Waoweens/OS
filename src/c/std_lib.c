@@ -64,3 +64,38 @@ void clear(byte *ptr, unsigned int n) {
 		ptr[i] = 0;
 	}
 }
+
+// concat string
+void strcat(char *dst, char *src) {
+	int i = 0;
+	int j = 0;
+	while (dst[i] != '\0') {
+		i++;
+	}
+	while (src[j] != '\0') {
+		dst[i] = src[j];
+		i++;
+		j++;
+	}
+	dst[i] = '\0';
+}
+
+// clear array
+void clrarr(char *arr, int size) {
+	int i;
+	for (i = 0; i < size; i++) {
+		arr[i] = '\0';
+	}
+}
+
+// starts with
+bool startsWith(char *str, char *prefix) {
+	int i = 0;
+	while (prefix[i] != '\0') {
+		if (str[i] != prefix[i]) {
+			return false;
+		}
+		i++;
+	}
+	return true;
+}
